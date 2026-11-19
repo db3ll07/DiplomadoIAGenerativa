@@ -1,0 +1,16 @@
+# Entornos y archivos locales
+.venv/
+__pycache__/
+*.py[cod]
+.env
+
+# Datos de la competencia: conserva los archivos localmente; comprueba reglas antes de subirlos
+datos/raw/*
+!datos/raw/README.md
+!datos/raw/.gitkeep
+
+datos/processed/*.csv
+datos/processed/*.db
+datos/processed/*.xlsx
+outputs/**
+!outputs/**/README.md
