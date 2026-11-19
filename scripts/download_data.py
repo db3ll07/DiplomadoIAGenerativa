@@ -1,7 +1,6 @@
-"""Descarga el dataset horario público original de UCI como respaldo.
+"""Descarga el dataset horario público desde UCI.
 
-El archivo UCI es una fuente pública equivalente al caso trabajado de Kaggle.
-No intenta iniciar sesión ni aceptar condiciones de Kaggle.
+Fuente de datos: UCI Machine Learning Repository, Bike Sharing Dataset.
 
 Relación con el Diplomado: prepara la materia prima del proyecto. En el flujo
 de datos esto corresponde a adquisición de datos antes de la limpieza y el

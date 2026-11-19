@@ -29,7 +29,6 @@ REFERENCES = [
     "Feng, J., Liu, H., Zhou, J., & Zhou, Y. (2024). A spatial-temporal aggregated graph neural network for docked bike-sharing demand forecasting. ACM Transactions on Knowledge Discovery from Data, 18(9), Article 232. https://doi.org/10.1145/3690388",
     "Chen, J., et al. (2022). Bike-sharing demand prediction at community level under COVID-19 using deep learning. Sensors, 22(3), 1060. https://doi.org/10.3390/s22031060",
     "UCI Machine Learning Repository. (2013). Bike Sharing Dataset. https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset",
-    "Kaggle. (2014). Bike Sharing Demand [Competition data]. https://www.kaggle.com/competitions/bike-sharing-demand/data",
 ]
 
 
@@ -48,7 +47,7 @@ def build_report():
     diff_ci = inf["difference_ci95_welch"]
     abstract = (
         "El proyecto estima el volumen total de alquileres de bicicletas por hora para apoyar la planeación de una operación de micromovilidad. "
-        "Se analizaron 17,379 registros horarios del Bike Sharing Dataset de Washington D. C. (2011–2012), obtenido de UCI como fuente pública equivalente al conjunto de Kaggle. "
+        "Se analizaron 17,379 registros horarios del Bike Sharing Dataset de Washington D. C. (2011–2012), obtenido del UCI Machine Learning Repository. "
         "Se excluyeron los conteos casuales y registrados porque son componentes directos del objetivo. Se derivaron hora, día de semana, mes y año; se compararon regresión lineal, árbol de decisión y Random Forest con validación cruzada temporal de cinco pliegues. "
         f"Random Forest obtuvo el menor RMSE medio de validación ({best['cv_rmse_promedio']:.1f} alquileres). En el último 20% cronológico, su RMSE fue {best['test_rmse']:.1f} y R² {best['test_r2']:.3f}. "
         f"Una red densa de Keras, con parada temprana, alcanzó RMSE {nn.get('test_rmse', float('nan')):.1f} y R² {nn.get('test_r2', float('nan')):.3f} en el mismo periodo. "
@@ -66,7 +65,7 @@ La investigación sobre bicicletas compartidas ha usado variables temporales y m
 Estos estudios incluyen señales espaciales o secuencias de inventario que el dataset de este proyecto no ofrece. Por eso se utilizan como contexto metodológico, no como una comparación directa de resultados. Para un proyecto inicial se eligen modelos tabulares sencillos y una red densa, que permiten comparar métodos de forma comprensible sin afirmar que resuelven la asignación por estación.
 """),
         ("3. Datos y análisis exploratorio", f"""
-La fuente es el Bike Sharing Dataset de UCI, equivalente al conjunto usado en la competencia Bike Sharing Demand de Kaggle. Contiene {metrics['n_observations']:,} filas horarias del 1 de enero de 2011 al 31 de diciembre de 2012. Se normalizaron las columnas al vocabulario de Kaggle, se combinaron fecha y hora, y se eliminaron duplicados por fecha/hora. No se observaron valores faltantes en las variables seleccionadas. El corte reproducible estilo Kaggle por día del mes genera 10,886 filas de entrenamiento (días 1–19) y 6,493 filas de prueba (días 20–fin); el archivo procesado conserva la etiqueta de UCI para evaluación retrospectiva.
+La fuente es el Bike Sharing Dataset del UCI Machine Learning Repository. Contiene {metrics['n_observations']:,} filas horarias del 1 de enero de 2011 al 31 de diciembre de 2012. Se cambiaron nombres de columnas y unidades para facilitar el análisis, se combinaron fecha y hora, y se eliminaron duplicados por fecha/hora. No se observaron valores faltantes en las variables seleccionadas. La evaluación usa un corte cronológico: el último 20% de las observaciones queda reservado para la prueba final.
 
 Las variables predictoras son temporada, feriado, día laboral, categoría meteorológica, temperatura, sensación térmica, humedad, velocidad de viento y características derivadas de fecha/hora. El objetivo `count` representa alquileres totales. Se excluyen `casual` y `registered` porque suman directamente el objetivo y filtrarían la respuesta hacia los predictores.
 
@@ -116,7 +115,7 @@ Se recomienda usar el modelo como una señal para planear revisiones horarias, r
     styles.add(ParagraphStyle(name="Small", parent=styles["BodyText"], fontSize=8, leading=10))
     story = [Paragraph("Pronóstico de demanda de bicicletas por hora", styles["TitleCenter"]),
              Paragraph("Proyecto final · Diplomado Liderazgo en la Era de la IA", styles["Heading3"]),
-             Paragraph("Autoría: Equipo por definir · Fuente: UCI Bike Sharing Dataset (equivalente de Kaggle)", styles["BodyText"]),
+             Paragraph("Autoría: Equipo por definir · Fuente: UCI Machine Learning Repository", styles["BodyText"]),
              Spacer(1, 8), Paragraph("Resumen", styles["Section"]), Paragraph(escape(abstract), styles["BodySpanish"])]
     for title, body in sections:
         story += [Paragraph(escape(title), styles["Section"])]

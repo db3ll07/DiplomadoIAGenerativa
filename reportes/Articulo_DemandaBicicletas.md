@@ -6,7 +6,7 @@
 
 ## Resumen
 
-El proyecto estima el volumen total de alquileres de bicicletas por hora para apoyar la planeación de una operación de micromovilidad. Se analizaron 17,379 registros horarios del Bike Sharing Dataset de Washington D. C. (2011–2012), obtenido de UCI como fuente pública equivalente al conjunto de Kaggle. Se excluyeron los conteos casuales y registrados porque son componentes directos del objetivo. Se derivaron hora, día de semana, mes y año; se compararon regresión lineal, árbol de decisión y Random Forest con validación cruzada temporal de cinco pliegues. Random Forest obtuvo el menor RMSE medio de validación (93.5 alquileres). En el último 20% cronológico, su RMSE fue 88.7 y R² 0.838. Una red densa de Keras, con parada temprana, alcanzó RMSE 74.7 y R² 0.885 en el mismo periodo. El resultado sugiere que la red mejora la prueba reservada, pero la selección del modelo debe confirmarse con validación temporal equivalente. Se recomienda usar el pronóstico como apoyo para revisar turnos y redistribución, sin extrapolarlo a estaciones individuales ni a otras ciudades.
+El proyecto estima el volumen total de alquileres de bicicletas por hora para apoyar la planeación de una operación de micromovilidad. Se analizaron 17,379 registros horarios del Bike Sharing Dataset de Washington D. C. (2011–2012), obtenido del UCI Machine Learning Repository. Se excluyeron los conteos casuales y registrados porque son componentes directos del objetivo. Se derivaron hora, día de semana, mes y año; se compararon regresión lineal, árbol de decisión y Random Forest con validación cruzada temporal de cinco pliegues. Random Forest obtuvo el menor RMSE medio de validación (93.5 alquileres). En el último 20% cronológico, su RMSE fue 88.7 y R² 0.838. Una red densa de Keras, con parada temprana, alcanzó RMSE 74.7 y R² 0.885 en el mismo periodo. El resultado sugiere que la red mejora la prueba reservada, pero la selección del modelo debe confirmarse con validación temporal equivalente. Se recomienda usar el pronóstico como apoyo para revisar turnos y redistribución, sin extrapolarlo a estaciones individuales ni a otras ciudades.
 
 ## 1. Introducción y definición del problema
 
@@ -22,7 +22,7 @@ Estos estudios incluyen señales espaciales o secuencias de inventario que el da
 
 ## 3. Datos y análisis exploratorio
 
-La fuente es el Bike Sharing Dataset de UCI, equivalente al conjunto usado en la competencia Bike Sharing Demand de Kaggle. Contiene 17,379 filas horarias del 1 de enero de 2011 al 31 de diciembre de 2012. Se normalizaron las columnas al vocabulario de Kaggle, se combinaron fecha y hora, y se eliminaron duplicados por fecha/hora. No se observaron valores faltantes en las variables seleccionadas. El corte reproducible estilo Kaggle por día del mes genera 10,886 filas de entrenamiento (días 1–19) y 6,493 filas de prueba (días 20–fin); el archivo procesado conserva la etiqueta de UCI para evaluación retrospectiva.
+La fuente es el Bike Sharing Dataset del UCI Machine Learning Repository. Contiene 17,379 filas horarias del 1 de enero de 2011 al 31 de diciembre de 2012. Se cambiaron nombres de columnas y unidades para facilitar el análisis, se combinaron fecha y hora, y se eliminaron duplicados por fecha/hora. No se observaron valores faltantes en las variables seleccionadas. La evaluación usa un corte cronológico: el último 20% de las observaciones queda reservado para la prueba final.
 
 Las variables predictoras son temporada, feriado, día laboral, categoría meteorológica, temperatura, sensación térmica, humedad, velocidad de viento y características derivadas de fecha/hora. El objetivo `count` representa alquileres totales. Se excluyen `casual` y `registered` porque suman directamente el objetivo y filtrarían la respuesta hacia los predictores.
 
@@ -72,4 +72,3 @@ El prompt de sistema y sus ejemplos están en `docs/ia_generativa.md`. La herram
 - Feng, J., Liu, H., Zhou, J., & Zhou, Y. (2024). A spatial-temporal aggregated graph neural network for docked bike-sharing demand forecasting. ACM Transactions on Knowledge Discovery from Data, 18(9), Article 232. https://doi.org/10.1145/3690388
 - Chen, J., et al. (2022). Bike-sharing demand prediction at community level under COVID-19 using deep learning. Sensors, 22(3), 1060. https://doi.org/10.3390/s22031060
 - UCI Machine Learning Repository. (2013). Bike Sharing Dataset. https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset
-- Kaggle. (2014). Bike Sharing Demand [Competition data]. https://www.kaggle.com/competitions/bike-sharing-demand/data

@@ -1,5 +1,5 @@
 # Datos originales
 
-El archivo original de UCI usado para preparar el proyecto es `hour.csv`, del Bike Sharing Dataset. Se descarga con `python scripts/download_data.py`. Kaggle requiere autenticación y aceptación de reglas; cuando se tenga acceso, `python scripts/download_kaggle.py` descarga `train.csv`, `test.csv` y `sampleSubmission.csv` sin rutas absolutas.
+El archivo horario `hour.csv` se obtiene del [UCI Machine Learning Repository — Bike Sharing Dataset](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset). Ejecuta `python scripts/download_data.py` para descargarlo. El proyecto guarda una copia local en esta carpeta, que está excluida de Git.
 
-No subir los CSV originales a Git hasta revisar las condiciones de redistribución de UCI/Kaggle.
+Antes de redistribuir los datos originales, revisa las condiciones de uso publicadas por UCI.

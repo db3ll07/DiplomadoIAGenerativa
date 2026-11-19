@@ -4,7 +4,7 @@ __pycache__/
 *.py[cod]
 .env
 
-# Datos de la competencia: conserva los archivos localmente; comprueba reglas antes de subirlos
+# Datos originales: se conservan localmente; revisa sus condiciones antes de redistribuirlos
 datos/raw/*
 !datos/raw/README.md
 !datos/raw/.gitkeep

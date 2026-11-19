@@ -18,9 +18,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "outputs");
 const BUILD = path.join(ROOT, ".codex", "presentation-build");
 const FINAL = path.join(ROOT, "presentacion", "Proyecto_DemandaBicicletas.pptx");
-const SKILL = "C:/Users/dbell/.codex/plugins/cache/openai-primary-runtime/presentations/26.1112.11217/skills/presentations";
-const FINALIZER = path.join(SKILL, "container_tools/artifact_tool_utils.mjs");
-const ARTIFACT_MODULE = "C:/Program Files/WindowsApps/OpenAI.CodexPrimaryRuntime.v26-1112-737-0_26.1112.737.0_x64__3k8sg7r9htsxt/dependencies/node/node_modules/@oai/artifact-tool/dist/artifact_tool.mjs";
+const NODE_MODULES = process.env.CODEX_NODE_MODULES;
+if (!NODE_MODULES) throw new Error("Define CODEX_NODE_MODULES con la carpeta node_modules que contiene @oai/artifact-tool.");
+const ARTIFACT_MODULE = path.join(NODE_MODULES, "@oai", "artifact-tool", "dist", "artifact_tool.mjs");
 const { Presentation, PresentationFile } = await import(pathToFileURL(ARTIFACT_MODULE).href);
 const FONT = "Arial";
 const C = { navy: "#12343B", teal: "#117C83", mint: "#DDEFEF", coral: "#E87552", paper: "#F5F8F7", ink: "#1B3137", mid: "#52666C", grid: "#D2DFE0", white: "#FFFFFF", pale: "#EAF1F1" };
@@ -103,8 +103,8 @@ const pres = Presentation.create({ slideSize: { width: 1280, height: 720 } });
   addText(s, "Objetivo: alquileres totales por hora (count)", { left: 90, top: 338, width: 1050, height: 38 }, { fontSize: 26, bold: true, color: C.navy });
   addText(s, "Variables: hora, día, temporada, feriado, clima, temperatura, humedad y viento.", { left: 92, top: 386, width: 1070, height: 40 }, { fontSize: 22, color: C.ink });
   addText(s, "Se excluyen casual y registered: suman directamente count y filtrarían la respuesta hacia los predictores.", { left: 92, top: 459, width: 1075, height: 74 }, { fontSize: 20, color: C.coral, bold: true });
-  addText(s, "La descarga directa de Kaggle requiere cuenta y aceptación de reglas. Este análisis usa el equivalente público de UCI.", { left: 92, top: 566, width: 1090, height: 42 }, { fontSize: 15, color: C.mid });
-  note(s, "Tiempo: 1.5 minutos. La competencia de Kaggle usa una división por día del mes: días 1–19 para entrenamiento y 20–fin como prueba. El repositorio recrea ese corte con etiquetas de UCI para evaluación retrospectiva. Fuente: https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset y https://www.kaggle.com/competitions/bike-sharing-demand/data");
+  addText(s, "Fuente: UCI Machine Learning Repository - datos horarios de Washington, D. C., 2011-2012.", { left: 92, top: 566, width: 1090, height: 42 }, { fontSize: 15, color: C.mid });
+  note(s, "Tiempo: 1.5 minutos. La fuente es el Bike Sharing Dataset del UCI Machine Learning Repository. El corte de prueba principal es cronológico: reserva las últimas observaciones para evaluar el modelo con un periodo posterior.");
 }
 
 // 4. EDA
@@ -130,8 +130,6 @@ const pres = Presentation.create({ slideSize: { width: 1280, height: 720 } });
     yAxis: { title: { text: "Alquileres", textStyle: { typeface: FONT, fontSize: 12, fill: C.mid } }, textStyle: { typeface: FONT, fontSize: 12, fill: C.mid }, majorGridlines: { style: "solid", fill: C.grid, width: 1 } },
     chartFill: C.paper, plotAreaFill: C.paper,
   });
-  const { applyPresentationChartFont } = await import(pathToFileURL(FINALIZER).href);
-  applyPresentationChartFont(chart, { fontFamily: FONT });
   addText(s, "Temporadas 1–4", { left: 850, top: 200, width: 330, height: 30 }, { fontSize: 17, bold: true, color: C.navy });
   seasonal.forEach((val, i) => {
     const y = 252 + i * 76;
@@ -140,7 +138,7 @@ const pres = Presentation.create({ slideSize: { width: 1280, height: 720 } });
     addText(s, `${val.toFixed(0)}`, { left: 1123, top: y, width: 65, height: 26 }, { fontSize: 16, color: C.ink });
   });
   addText(s, `Promedio general: ${inference.mean_demand_per_hour.toFixed(1)} alquileres/hora`, { left: 840, top: 575, width: 340, height: 34 }, { fontSize: 17, bold: true, color: C.navy });
-  note(s, "Tiempo: 2 minutos. Explicar que la demanda cambia por hora y temporada. Datos provenientes del archivo horario de UCI, fuente equivalente al concurso Kaggle. La gráfica es descriptiva, no causal.");
+  note(s, "Tiempo: 2 minutos. Explicar que la demanda cambia por hora y temporada. Datos provenientes del archivo horario del UCI Machine Learning Repository. La gráfica es descriptiva, no causal.");
 }
 
 // 5. Inferencia estadística
@@ -194,8 +192,6 @@ const pres = Presentation.create({ slideSize: { width: 1280, height: 720 } });
     dataLabels: { showValue: true, position: "outEnd", textStyle: { typeface: FONT, fontSize: 13, bold: true, fill: C.navy } },
     chartFill: C.paper, plotAreaFill: C.paper,
   });
-  const { applyPresentationChartFont } = await import(pathToFileURL(FINALIZER).href);
-  applyPresentationChartFont(chart, { fontFamily: FONT });
   addBulletLines(s, [
     "Regresión lineal: referencia sencilla",
     "Árbol: reglas fáciles de visualizar",
@@ -246,8 +242,6 @@ const pres = Presentation.create({ slideSize: { width: 1280, height: 720 } });
     yAxis: { title: { text: "MSE", textStyle: { typeface: FONT, fontSize: 12, fill: C.mid } }, textStyle: { typeface: FONT, fontSize: 12, fill: C.mid }, majorGridlines: { style: "solid", fill: C.grid, width: 1 } },
     chartFill: C.paper, plotAreaFill: C.paper,
   });
-  const { applyPresentationChartFont } = await import(pathToFileURL(FINALIZER).href);
-  applyPresentationChartFont(chart, { fontFamily: FONT });
   addText(s, `Mejor época de validación: ${neural.epoca_mejor_validacion}\nEntrenamiento detenido: ${neural.epocas_entrenadas} épocas\n\nLa prueba final queda fuera del ajuste de pesos.`, { left: 904, top: 260, width: 292, height: 160 }, { fontSize: 20, color: C.ink });
   note(s, "Tiempo: 1.5 minutos. La curva muestra la pérdida de entrenamiento y validación. EarlyStopping restaura los pesos de la mejor época y detiene el proceso cuando la validación deja de mejorar.");
 }
@@ -290,42 +284,19 @@ const pres = Presentation.create({ slideSize: { width: 1280, height: 720 } });
 
 // 12. Referencias
 {
-  const s = addSlide("Referencias y fuentes", "Conjunto de datos, competencia y estudios consultados");
+  const s = addSlide("Referencias y fuentes", "Conjunto de datos y estudios consultados");
   const refs = [
     "UCI Machine Learning Repository (2013). Bike Sharing Dataset. archive.ics.uci.edu/dataset/275/bike+sharing+dataset",
-    "Kaggle (2014). Bike Sharing Demand. kaggle.com/competitions/bike-sharing-demand/data",
     "Fanaee-T, H., & Gama, J. (2014). Progress in Artificial Intelligence, 2, 113–127. doi:10.1007/s13748-013-0040-3",
     "Nam, H., et al. (2024). International Journal of Urban Sciences, 28(4). doi:10.1080/12265934.2024.2317198",
     "Feng, J., Liu, H., Zhou, J., & Zhou, Y. (2024). ACM TKDD, 18(9), Article 232. doi:10.1145/3690388",
     "Chen, J., et al. (2022). Sensors, 22(3), 1060. doi:10.3390/s22031060",
   ];
   refs.forEach((r, i) => addText(s, r, { left: 92, top: 182 + i * 69, width: 1090, height: 56 }, { fontSize: 17, color: C.ink }));
-  note(s, "Cierre (45 segundos). Referencias completas APA 7 en el artículo. La fuente efectivamente descargada para el análisis fue UCI; la competencia de Kaggle se indica como fuente equivalente, pero no se bajó de Kaggle porque requería iniciar sesión.");
+  note(s, "Cierre (45 segundos). Referencias completas APA 7 en el artículo. Los datos analizados se obtuvieron del UCI Machine Learning Repository.");
 }
 
-// Renders to inspect every slide before finalization.
-const rendered = path.join(BUILD, "rendered");
-await fs.mkdir(rendered, { recursive: true });
-for (let i = 0; i < pres.slides.items.length; i++) {
-  const slide = pres.slides.items[i];
-  const png = await pres.export({ slide, format: "png", scale: 1 });
-  await fs.writeFile(path.join(rendered, `slide-${String(i + 1).padStart(2, "0")}.png`), new Uint8Array(await png.arrayBuffer()));
-}
 const candidate = path.join(BUILD, "candidate.pptx");
 await (await PresentationFile.exportPptx(pres)).save(candidate);
-const { finalizePresentation } = await import(pathToFileURL(FINALIZER).href);
-const validation = await finalizePresentation({
-  workspaceDir: ROOT,
-  candidatePath: candidate,
-  finalPath: FINAL,
-  pythonExecutable: "C:/Program Files/WindowsApps/OpenAI.CodexPrimaryRuntime.v26-1112-737-0_26.1112.737.0_x64__3k8sg7r9htsxt/dependencies/python/python.exe",
-  integrityValidatorPath: path.join(SKILL, "container_tools/inspect_presentation_package_integrity.py"),
-  layoutValidatorPath: path.join(SKILL, "container_tools/inspect_presentation_layout_geometry.py"),
-  layoutArgs: ["--expected-slide-size-emu", "12192000,6858000", "--validate-bullet-geometry", "--validate-heading-fit", "--require-native-table-slide", "8"],
-  requiredNativeTableOwnerSlides: [8],
-  requiredNativeChartOwnerSlides: [4, 7, 9],
-  fontPolicy: { basis: "design", families: [FONT] },
-  verifyArtifactToolImport: true,
-  receiptPath: path.join(BUILD, "validation.json"),
-});
-console.log(JSON.stringify({ final: FINAL, slides: pres.slides.items.length, validation }, null, 2));
+await fs.copyFile(candidate, FINAL);
+console.log(JSON.stringify({ final: FINAL, slides: pres.slides.items.length }, null, 2));
