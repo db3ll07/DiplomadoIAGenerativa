@@ -47,7 +47,16 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 ```
 
-El agente corre en modo de demostración local sin credenciales. Para usar un servicio LLM, configura `OPENAI_API_KEY` y `OPENAI_MODEL` en la sesión; esto no es necesario para el análisis ni para los modelos predictivos.
+El agente corre en modo de demostración local sin credenciales. Para usar OpenAI, configura `OPENAI_API_KEY` y `OPENAI_MODEL` en PowerShell y vuelve a ejecutar el script. La clave se lee desde la variable de entorno; no la escribas en el código ni la subas a Git. Este paso no es necesario para el análisis ni para los modelos predictivos.
+
+```powershell
+$secureApiKey = Read-Host "Clave API de OpenAI" -AsSecureString
+$env:OPENAI_API_KEY = [System.Net.NetworkCredential]::new("", $secureApiKey).Password
+$env:OPENAI_MODEL = "gpt-6-luna"
+python scripts/demand_agent.py
+```
+
+El ejemplo usa `gpt-6-luna`; puedes sustituirlo por otro modelo habilitado en tu cuenta que admita llamadas a funciones en la API Responses. Las variables solo permanecen en esa ventana de PowerShell. Si falta una de las dos, el script muestra un error claro; si faltan ambas, usa la demostración local. La llamada usa la API Responses de OpenAI y puede generar cargos según el uso de tu cuenta.
 
 ### Archivos que genera el flujo
 
