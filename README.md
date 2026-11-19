@@ -10,7 +10,8 @@ Se utiliza el **Bike Sharing Dataset** del [UCI Machine Learning Repository](htt
 
 - Windows 10/11, PowerShell y Python 3.11 de 64 bits.
 - Conexión a internet para descargar el conjunto de datos y las dependencias.
-- Espacio para instalar TensorFlow y las demás bibliotecas indicadas en `requirements.txt`.
+- Espacio para instalar TensorFlow y las demás bibliotecas indicadas en `requirements.txt` (TensorFlow puede requerir una descarga considerable).
+- Para regenerar la presentación: Node.js y acceso a `@oai/artifact-tool`; consulta la sección **Presentación y Power BI**. No es requisito del flujo Python.
 
 ## Ejecutar el flujo de análisis desde una clonación limpia
 
@@ -29,6 +30,14 @@ python scripts/build_sqlite.py
 python scripts/export_powerbi_source.py
 python scripts/generate_report_assets.py
 python scripts/demand_agent.py
+```
+
+El flujo produce también el artículo Markdown y el PDF con `generate_report_assets.py`. `scripts/common.py` es un módulo compartido que se importa desde otros scripts; no se ejecuta directamente. El orden anterior satisface las dependencias entre entradas y salidas de los scripts Python.
+
+Para abrir el notebook, instala las dependencias anteriores, inicia Jupyter desde la raíz del repositorio y abre `notebooks/01_Analisis_y_modelos.ipynb`:
+
+```powershell
+python -m jupyter notebook
 ```
 
 Si PowerShell impide activar el entorno virtual, ejecuta esta instrucción solo para la ventana actual y vuelve a activar el entorno:
@@ -54,6 +63,8 @@ El agente corre en modo de demostración local sin credenciales. Para usar un se
 ## Presentación y Power BI
 
 La presentación editable de 12 diapositivas está en `presentacion/Proyecto_DemandaBicicletas.pptx`. Para regenerarla se necesita Node.js y el paquete Artifact Tool disponible en el entorno Codex. Define `CODEX_NODE_MODULES` como la carpeta `node_modules` de ese entorno y ejecuta `node scripts/make_presentation.mjs`. La generación de la presentación no es necesaria para correr el flujo Python anterior.
+
+En PowerShell, define la variable para la sesión con `$env:CODEX_NODE_MODULES = 'C:\ruta\al\entorno\node_modules'` antes de ejecutar el comando. Debe existir `@oai/artifact-tool` dentro de esa carpeta. El script también necesita `outputs/metrics/resultados.json`, generado por `train_models.py`; por eso, primero completa el flujo Python.
 
 El Excel para Power BI sí se genera automáticamente. Para completar y guardar el archivo `.pbix`, abre `datos/processed/powerbi_source.xlsx` en Power BI Desktop, relaciona las dimensiones con `FactDemand`, crea las medidas DAX de `sql/medidas_dax.md` y sigue el diseño de `tablero/README.md`. El repositorio aún no incluye un `.pbix` terminado.
 
@@ -88,4 +99,10 @@ Los resultados son históricos y corresponden a Washington, D. C. El dataset no 
 - Si aparece `ModuleNotFoundError`, activa `.venv` e instala de nuevo con `python -m pip install -r requirements.txt`.
 - Si un paso indica que falta un archivo procesado, ejecuta los scripts anteriores en el orden indicado.
 - Si TensorFlow no está disponible, reinstala las dependencias con Python 3.11 de 64 bits. El script informa el estado de la red neuronal junto con los resultados de los modelos clásicos.
+- Si la red neuronal no se genera, revisa `outputs/metrics/resultados.json`: `train_models.py` captura el error de TensorFlow y aun así guarda los resultados de los modelos clásicos.
+- Para regenerar la presentación, confirma que Node.js está disponible (`node --version`), que `CODEX_NODE_MODULES` apunta a la carpeta correcta y que ahí está `@oai/artifact-tool`.
 - No borres los archivos de `outputs/metrics/` antes de ejecutar `build_sqlite.py`, porque ahí se encuentra el modelo que usa el asistente.
+
+## Archivos locales excluidos de Git
+
+`.gitignore` excluye el entorno virtual, cachés de Python/Jupyter, archivos temporales y locales, dependencias de Node, el conjunto de datos descargado, tablas y bases SQLite/Excel generadas, y el contenido generado de `outputs/`. Los README de esas carpetas se conservan versionados para explicar cómo recrear los archivos. La base de datos SQLite generada también se retiró del seguimiento de Git; permanece en tu carpeta local y se vuelve a crear con `build_sqlite.py`.
