@@ -1,22 +1,8 @@
 # Entornos y archivos locales
 .venv/
-venv/
 __pycache__/
 *.py[cod]
 .env
-.env.*
-!.env.example
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.ipynb_checkpoints/
-node_modules/
-npm-debug.log*
-*.log
-*.tmp
-*.bak
-~$*
-.codex/presentation-build/
 
 # Datos originales: se conservan localmente; revisa sus condiciones antes de redistribuirlos
 datos/raw/*
@@ -25,8 +11,6 @@ datos/raw/*
 
 datos/processed/*.csv
 datos/processed/*.db
-datos/processed/*.sqlite
-datos/processed/*.sqlite3
 datos/processed/*.xlsx
 outputs/**
 !outputs/**/README.md

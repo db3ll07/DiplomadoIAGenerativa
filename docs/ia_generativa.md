@@ -28,8 +28,6 @@ Salida: La demanda estimada para las 02:00 es baja, cercana a 35 alquileres. Pue
 - La salida incluye la hora y el volumen estimado, para facilitar la revisión humana.
 - El prompt impide inventar información de estaciones: el dataset es agregado por hora.
 - Con `OPENAI_API_KEY` y `OPENAI_MODEL` configurados, el script realiza una llamada a la API Responses. Sin credenciales, produce una respuesta local de demostración y lo indica expresamente.
-- En PowerShell, define ambas variables en la sesión antes de ejecutar `python scripts/demand_agent.py`. El nombre de modelo debe estar habilitado en tu cuenta de API. La clave no se debe guardar en el código ni subir al repositorio.
-- Si falta una sola variable, el script se detiene con un mensaje de configuración. Si la API devuelve un error HTTP o de conexión, lo muestra como error en lugar de presentar la respuesta local como si la hubiera generado el LLM.
 - El prompt y una salida de ejemplo se guardan como evidencia en el anexo del reporte.
 
 ## Limitación
