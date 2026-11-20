@@ -4,7 +4,20 @@ Esta guía acompaña el código como apuntes para volver a entenderlo. Cada scri
 
 ## Orden de ejecución
 
-Sigue la sección **Ejecutar el flujo de análisis desde una clonación limpia** del README. El flujo descarga el conjunto de UCI, lo prepara, compara modelos, crea las tablas de SQL/BI, genera el reporte y muestra una demostración del asistente.
+Para regenerar todos los resultados, sigue la sección **Ejecutar el flujo de análisis desde una clonación limpia** del [README principal](../README.md). El flujo descarga el conjunto de UCI, lo prepara, compara modelos, crea las tablas de SQL/BI, genera el reporte y muestra una demostración del asistente.
+
+### Orden específico para SQL y Microsoft Fabric
+
+1. Ejecuta `python scripts/download_data.py` para descargar los datos.
+2. Ejecuta `python scripts/prepare_data.py` para crear las observaciones limpias.
+3. Ejecuta `python scripts/train_models.py` para guardar las predicciones del periodo de prueba.
+4. Ejecuta `python scripts/build_sqlite.py`. Este paso crea la base local `datos/processed/demand_bikes.sqlite` y los cuatro CSV (`FactDemand.csv`, `DimDate.csv`, `DimHour.csv` y `DimConditions.csv`) que se cargan en el Lakehouse. Para comparar pronósticos, incluye este paso después del entrenamiento.
+5. En Fabric, carga los cuatro CSV al Lakehouse y usa **Cargar en tablas** para convertirlos en tablas. No cargues el archivo SQLite para este flujo.
+6. Ejecuta las consultas de [`sql/queries.sql`](../sql/queries.sql) en el endpoint de análisis SQL del Lakehouse, una por una.
+7. Crea el modelo semántico y sus relaciones; después agrega las medidas DAX siguiendo [`sql/medidas_dax.md`](../sql/medidas_dax.md).
+8. Crea el informe y las tarjetas siguiendo [`tablero/README.md`](../tablero/README.md).
+
+El script `python scripts/export_powerbi_source.py` es opcional para este flujo: genera un Excel para importar en Power BI Desktop y debe ejecutarse después de `build_sqlite.py`. Las consultas SQL son una verificación recomendada antes de DAX, pero no son una dependencia técnica de las medidas.
 
 ## Qué hace cada archivo y qué tema practica
 

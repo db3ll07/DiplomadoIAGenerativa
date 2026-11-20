@@ -51,11 +51,23 @@ El agente corre en modo de demostración local sin credenciales. Para usar un se
 - `datos/processed/powerbi_source.xlsx`: libro con las cuatro tablas para importar en Power BI.
 - `reportes/Articulo_DemandaBicicletas.md` y `reportes/Reporte_DemandaBicicletas.pdf`: reporte actualizado con las métricas calculadas.
 
-## Presentación y Power BI
+## Consultas SQL y Microsoft Fabric
 
-La presentación editable de 12 diapositivas está en `presentacion/Proyecto_DemandaBicicletas.pptx`. Para regenerarla se necesita Node.js y el paquete Artifact Tool disponible en el entorno Codex. Define `CODEX_NODE_MODULES` como la carpeta `node_modules` de ese entorno y ejecuta `node scripts/make_presentation.mjs`. La generación de la presentación no es necesaria para correr el flujo Python anterior.
+Para preparar los datos de SQL y BI, ejecuta los scripts en este orden desde la raíz del proyecto:
 
-El Excel para Power BI sí se genera automáticamente. Para completar y guardar el archivo `.pbix`, abre `datos/processed/powerbi_source.xlsx` en Power BI Desktop, relaciona las dimensiones con `FactDemand`, crea las medidas DAX de `sql/medidas_dax.md` y sigue el diseño de `tablero/README.md`. El repositorio aún no incluye un `.pbix` terminado.
+1. `python scripts/download_data.py`: descarga los datos originales.
+2. `python scripts/prepare_data.py`: prepara las observaciones.
+3. `python scripts/train_models.py`: entrena los modelos y guarda las predicciones de prueba.
+4. `python scripts/build_sqlite.py`: crea `datos/processed/demand_bikes.sqlite` y los cuatro CSV del modelo (`FactDemand.csv`, `DimDate.csv`, `DimHour.csv` y `DimConditions.csv`).
+5. En Fabric, crea un Lakehouse, carga esos cuatro CSV y conviértelos en tablas. Después ejecuta, una por una, las consultas de [`sql/queries.sql`](./sql/queries.sql) en el endpoint de análisis SQL del Lakehouse.
+6. Crea el modelo semántico a partir de las tablas, configura sus relaciones y agrega las medidas de [`sql/medidas_dax.md`](./sql/medidas_dax.md).
+7. Crea las tarjetas y el resto del informe siguiendo [`tablero/README.md`](./tablero/README.md).
+
+El orden de SQL antes de DAX es recomendado para verificar las tablas y documentar las consultas de SQL; no es una dependencia técnica. Los pasos detallados están en [`sql/README.md`](./sql/README.md).
+
+`python scripts/export_powerbi_source.py` es opcional: después de `build_sqlite.py`, genera `datos/processed/powerbi_source.xlsx` para importar las tablas en Power BI Desktop. Para el flujo de Fabric descrito arriba, se usan directamente los cuatro CSV; no hace falta cargar `demand_bikes.sqlite` ni el Excel. El repositorio no incluye un informe `.pbix` terminado.
+
+La presentación editable de 12 diapositivas está en `presentacion/Proyecto_DemandaBicicletas.pptx`. El archivo ya generado se puede abrir en PowerPoint sin instalar herramientas adicionales. Regenerarlo es opcional y requiere Node.js y el módulo Artifact Tool disponible en una carpeta `node_modules`. El script usa por defecto `node_modules` en la raíz del proyecto; si el módulo está en otra ubicación, define `ARTIFACT_TOOL_NODE_MODULES` con la ruta a esa carpeta y ejecuta `node scripts/make_presentation.mjs`. Esto no es necesario para preparar las tablas SQL/BI.
 
 ## Proyecto y rúbrica
 

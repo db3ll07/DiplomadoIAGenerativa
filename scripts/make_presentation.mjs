@@ -16,10 +16,9 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "outputs");
-const BUILD = path.join(ROOT, ".codex", "presentation-build");
+const BUILD = path.join(ROOT, ".build", "presentation-build");
 const FINAL = path.join(ROOT, "presentacion", "Proyecto_DemandaBicicletas.pptx");
-const NODE_MODULES = process.env.CODEX_NODE_MODULES;
-if (!NODE_MODULES) throw new Error("Define CODEX_NODE_MODULES con la carpeta node_modules que contiene @oai/artifact-tool.");
+const NODE_MODULES = process.env.ARTIFACT_TOOL_NODE_MODULES || path.join(ROOT, "node_modules");
 const ARTIFACT_MODULE = path.join(NODE_MODULES, "@oai", "artifact-tool", "dist", "artifact_tool.mjs");
 const { Presentation, PresentationFile } = await import(pathToFileURL(ARTIFACT_MODULE).href);
 const FONT = "Arial";

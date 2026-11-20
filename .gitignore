@@ -3,6 +3,7 @@
 __pycache__/
 *.py[cod]
 .env
+.build/
 
 # Datos originales: se conservan localmente; revisa sus condiciones antes de redistribuirlos
 datos/raw/*
@@ -12,5 +13,6 @@ datos/raw/*
 datos/processed/*.csv
 datos/processed/*.db
 datos/processed/*.xlsx
+datos/processed/demand_bikes.sqlite
 outputs/**
 !outputs/**/README.md
