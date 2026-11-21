@@ -27,7 +27,7 @@ Salida: La demanda estimada para las 02:00 es baja, cercana a 35 alquileres. Pue
 - La herramienta consulta el mismo modelo que se evalúa en el proyecto.
 - La salida incluye la hora y el volumen estimado, para facilitar la revisión humana.
 - El prompt impide inventar información de estaciones: el dataset es agregado por hora.
-- Con `OPENAI_API_KEY` y `OPENAI_MODEL` configurados, el script realiza una llamada a la API Responses. Sin credenciales, produce una respuesta local de demostración y lo indica expresamente.
+- Para la defensa, ejecuta `python scripts/demand_agent.py --require-llm` con `OPENAI_API_KEY` y `OPENAI_MODEL` configurados. El modo obligatorio detiene la ejecución si no se llama a la herramienta o no se recibe una explicación real del LLM. Sin esa opción, el script conserva una respuesta local fija, claramente identificada como demostración.
 - El prompt y una salida de ejemplo se guardan como evidencia en el anexo del reporte.
 
 ## Limitación

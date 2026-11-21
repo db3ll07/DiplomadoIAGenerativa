@@ -10,7 +10,7 @@ Para regenerar todos los resultados, sigue la sección **Ejecutar el flujo de an
 
 1. Ejecuta `python scripts/download_data.py` para descargar los datos.
 2. Ejecuta `python scripts/prepare_data.py` para crear las observaciones limpias.
-3. Ejecuta `python scripts/train_models.py` para guardar las predicciones del periodo de prueba.
+3. Ejecuta `python scripts/train_models.py` para guardar las predicciones del periodo de prueba. El script ajusta obligatoriamente los hiperparámetros de cada modelo usando validación temporal y guarda los mejores valores en `outputs/metrics/comparacion_modelos.csv`.
 4. Ejecuta `python scripts/build_sqlite.py`. Este paso crea la base local `datos/processed/demand_bikes.sqlite` y los cuatro CSV (`FactDemand.csv`, `DimDate.csv`, `DimHour.csv` y `DimConditions.csv`) que se cargan en el Lakehouse. Para comparar pronósticos, incluye este paso después del entrenamiento.
 5. En Fabric, carga los cuatro CSV al Lakehouse y usa **Cargar en tablas** para convertirlos en tablas. No cargues el archivo SQLite para este flujo.
 6. Ejecuta las consultas de [`sql/queries.sql`](../sql/queries.sql) en el endpoint de análisis SQL del Lakehouse, una por una.

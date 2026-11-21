@@ -6,7 +6,7 @@
 
 ## Resumen
 
-El proyecto estima el volumen total de alquileres de bicicletas por hora para apoyar la planeación de una operación de micromovilidad. Se analizaron 17,379 registros horarios del Bike Sharing Dataset de Washington D. C. (2011–2012), obtenido del UCI Machine Learning Repository. Se excluyeron los conteos casuales y registrados porque son componentes directos del objetivo. Se derivaron hora, día de semana, mes y año; se compararon regresión lineal, árbol de decisión y Random Forest con validación cruzada temporal de cinco pliegues. Random Forest obtuvo el menor RMSE medio de validación (93.5 alquileres). En el último 20% cronológico, su RMSE fue 88.7 y R² 0.838. Una red densa de Keras, con parada temprana, alcanzó RMSE 74.7 y R² 0.885 en el mismo periodo. El resultado sugiere que la red mejora la prueba reservada, pero la selección del modelo debe confirmarse con validación temporal equivalente. Se recomienda usar el pronóstico como apoyo para revisar turnos y redistribución, sin extrapolarlo a estaciones individuales ni a otras ciudades.
+El proyecto estima el volumen total de alquileres de bicicletas por hora para apoyar la planeación de una operación de micromovilidad. Se analizaron 17,379 registros horarios del Bike Sharing Dataset de Washington D. C. (2011–2012), obtenido del UCI Machine Learning Repository. Se excluyeron los conteos casuales y registrados porque son componentes directos del objetivo. Se derivaron hora, día de semana, mes y año; se compararon regresión lineal, árbol de decisión y Random Forest con validación cruzada temporal de cinco pliegues. Random Forest obtuvo el menor RMSE medio de validación (97.4 alquileres). En el último 20% cronológico, su RMSE fue 92.2 y R² 0.825. Una red densa de Keras, con parada temprana, alcanzó RMSE 74.7 y R² 0.885 en el mismo periodo. La red obtuvo menor error en ese holdout compartido, pero no participó en los mismos cinco pliegues temporales; esta diferencia impide concluir que generalice mejor. Se recomienda usar el pronóstico como apoyo para revisar turnos y redistribución, sin extrapolarlo a estaciones individuales ni a otras ciudades.
 
 ## 1. Introducción y definición del problema
 
@@ -30,15 +30,15 @@ La demanda media observada fue 189.5 alquileres por hora (IC 95%: 186.8–192.2)
 
 ## 4. Metodología
 
-Se ordenaron las observaciones por fecha y se reservaron los últimos 3,476 registros (20%) como prueba temporal, desde 2012-08-07 hasta 2012-12-31. Los modelos clásicos se ajustaron y compararon en el primer 80% con validación cruzada de cinco pliegues tipo ventana expansiva (TimeSeriesSplit). Las variables categóricas se codificaron con one-hot; las numéricas se imputaron por mediana y estandarizaron dentro de cada pipeline para evitar fuga entre pliegues.
+Se ordenaron las observaciones por fecha y se reservaron los últimos 3,476 registros (20%) como prueba temporal, desde 2012-08-07 hasta 2012-12-31. Los modelos clásicos se ajustaron y compararon en el primer 80% con validación cruzada de cinco pliegues tipo ventana expansiva (TimeSeriesSplit). Durante la eliminación recursiva, cada fold ajusta su propio codificador one-hot; las importancias de las categorías se agrupan por variable original y la selección conserva o elimina la variable completa. Las variables numéricas se imputan y estandarizan dentro del pipeline.
 
-Se compararon regresión lineal, árbol de decisión (profundidad máxima 18) y Random Forest (100 árboles). El criterio de selección fue el menor RMSE medio de validación cruzada. Se reportan RMSE y R²; RMSE expresa el error típico en número de alquileres y R² resume la proporción de variación explicada en esa partición.
+Se compararon regresión lineal, árbol de decisión y Random Forest con búsqueda automática de hiperparámetros. El criterio de selección fue el menor RMSE medio de validación cruzada. Se reportan RMSE, MAE, MAPE, WAPE y R². MAPE excluye objetivos reales iguales a cero; WAPE usa el error absoluto total respecto a la demanda total.
 
 La red Keras tuvo capas densas de 64 y 32 unidades, activación ReLU y dropout de 0.15. Se usó una partición temporal interna para validación y EarlyStopping con restauración de los mejores pesos. La comparación en la prueba utiliza el mismo último 20% cronológico. El componente generativo es un agente con prompt acotado y herramienta de pronóstico; requiere clave y modelo LLM configurados para la llamada externa, y ofrece un respaldo local ilustrativo.
 
 ## 5. Resultados
 
-Random Forest fue el mejor modelo clásico por RMSE medio de validación cruzada. En la prueba temporal, la red neuronal obtuvo un RMSE menor que Random Forest. Esto no implica que siempre sea superior: la CV comparativa se aplicó a los modelos clásicos, mientras que la red se evaluó con una validación interna para detener el entrenamiento y una prueba externa común. El seguimiento recomendado es incluir la red en la misma validación temporal de cinco pliegues si se amplía el proyecto.
+Random Forest fue el mejor modelo clásico por RMSE medio de validación cruzada. En la prueba temporal compartida, la red neuronal obtuvo un RMSE menor que Random Forest. La red usó una validación temporal interna para detener el entrenamiento, pero no participó en los mismos cinco pliegues; por eso, el holdout común no demuestra que generalice mejor. El seguimiento recomendado es incluir la red en la misma validación temporal de cinco pliegues si se amplía el proyecto.
 
 La tabla siguiente reúne los resultados solicitados por la rúbrica. Los valores corresponden a esta división temporal y no deben interpretarse como garantías de desempeño en otro periodo o ciudad.
 
@@ -50,12 +50,12 @@ Se recomienda usar el modelo como una señal para planear revisiones horarias, r
 
 ### Tabla de comparación de modelos
 
-| Modelo | RMSE CV (media ± DE) | RMSE prueba | MAE prueba | R² prueba |
-|---|---:|---:|---:|---:|
-| Regresión lineal | 108.76 ± 21.64 | 133.82 | 98.69 | 0.632 |
-| Árbol de decisión | 109.73 ± 29.25 | 104.74 | 69.02 | 0.774 |
-| Random Forest | 93.46 ± 23.31 | 88.71 | 59.74 | 0.838 |
-| Red neuronal Keras | — | 74.74 | 53.16 | 0.885 |
+| Modelo | RMSE CV (media ± DE) | RMSE prueba | MAE prueba | MAPE prueba | WAPE prueba | R² prueba |
+|---|---:|---:|---:|---:|---:|---:|
+| Random Forest | 97.38 ± 21.47 | 92.23 | 62.84 | 54.35% | 25.26% | 0.825 |
+| Regresión lineal | 108.10 ± 22.75 | 133.82 | 98.69 | 211.35% | 39.67% | 0.632 |
+| Árbol de decisión | 111.13 ± 28.07 | 94.68 | 61.85 | 44.82% | 24.86% | 0.816 |
+| Red neuronal Keras | — | 74.74 | 53.16 | 86.24% | 21.37% | 0.885 |
 
 ## Tablero Power BI y preparación SQL
 
@@ -63,7 +63,7 @@ El repositorio crea una base SQLite y CSV para cargar: FactDemand, DimDate, DimH
 
 ## Anexo: componente generativo
 
-El prompt de sistema y sus ejemplos están en `docs/ia_generativa.md`. La herramienta `predict_hour_demand` consulta el modelo clásico serializado; el LLM resume el pronóstico sin inventar estaciones o inventario. Sin credenciales, el agente usa una respuesta local de demostración.
+El prompt de sistema y sus ejemplos están en `docs/ia_generativa.md`. La herramienta `predict_hour_demand` consulta el modelo clásico serializado; el LLM resume el pronóstico sin inventar estaciones o inventario. Para una demostración real en la defensa, ejecuta `python scripts/demand_agent.py --require-llm` con `OPENAI_API_KEY` y `OPENAI_MODEL` configurados.
 
 ## Referencias (APA 7)
 

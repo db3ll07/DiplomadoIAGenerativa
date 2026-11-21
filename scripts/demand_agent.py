@@ -13,6 +13,7 @@ python scripts/demand_agent.py
 from pathlib import Path
 import json
 import os
+import argparse
 import urllib.request
 import pandas as pd
 import joblib
@@ -62,12 +63,16 @@ def _local_summary(prediction):
             "El modelo predice demanda agregada histórica y no conoce el inventario ni la ubicación de las bicicletas.")
 
 
-def generate_summary(arguments):
+def generate_summary(arguments, require_llm=False):
     """Pide un pronóstico y, si está configurado, se lo pasa al LLM."""
     prediction = predict_hour_demand(arguments)
     api_key = os.environ.get("OPENAI_API_KEY")
     model_name = os.environ.get("OPENAI_MODEL")
     if not api_key or not model_name:
+        if require_llm:
+            raise RuntimeError(
+                "El modo --require-llm necesita OPENAI_API_KEY y OPENAI_MODEL."
+            )
         return {"prediction": prediction, "summary": _local_summary(prediction),
                 "mode": "demostración local; configura OPENAI_API_KEY y OPENAI_MODEL para usar el LLM"}
     payload = {"model": model_name, "input": [
@@ -81,6 +86,10 @@ def generate_summary(arguments):
         first = json.loads(response.read().decode("utf-8"))
     calls = [item for item in first.get("output", []) if item.get("type") == "function_call"]
     if not calls:
+        if require_llm:
+            raise RuntimeError(
+                "La respuesta del servicio no llamó predict_hour_demand; no se mostrará el modo local."
+            )
         return {"prediction": prediction, "summary": _local_summary(prediction),
                 "mode": "respaldo local; la respuesta no invocó la herramienta"}
     outputs = []
@@ -94,12 +103,24 @@ def generate_summary(arguments):
                                  method="POST")
     with urllib.request.urlopen(req, timeout=60) as response:
         second = json.loads(response.read().decode("utf-8"))
-    return {"prediction": prediction, "summary": second.get("output_text", _local_summary(prediction)), "mode": "LLM + herramienta predict_hour_demand"}
+    summary = second.get("output_text")
+    if not summary and require_llm:
+        raise RuntimeError(
+            "La llamada del LLM no devolvió una explicación final; no se mostrará el modo local."
+        )
+    return {"prediction": prediction, "summary": summary or _local_summary(prediction), "mode": "LLM + herramienta predict_hour_demand" if summary else "respaldo local; respuesta final vacía"}
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Demuestra el agente de pronóstico de bicicletas.")
+    parser.add_argument(
+        "--require-llm",
+        action="store_true",
+        help="Exige una respuesta real del LLM y la herramienta; no acepta el resumen local.",
+    )
+    args = parser.parse_args()
     example = {"datetime": "2012-07-10 08:00", "season": 3, "holiday": 0, "workingday": 1,
                "weather": 1, "temp": 28.0, "atemp": 31.0, "humidity": 62.0, "windspeed": 11.0}
-    result = generate_summary(example)
+    result = generate_summary(example, require_llm=args.require_llm)
     print(json.dumps(result, indent=2, ensure_ascii=False))
 

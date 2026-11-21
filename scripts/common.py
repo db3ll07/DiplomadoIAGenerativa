@@ -129,8 +129,8 @@ def _uci_to_common(df: pd.DataFrame) -> pd.DataFrame:
         "workingday": df["workingday"],
         "weather": df["weathersit"],
 
-        "temp": df["temp"] * 41,
-        "atemp": df["atemp"] * 50,
+        "temp": df["temp"] * 47 - 8,
+        "atemp": df["atemp"] * 66 - 16,
         "humidity": df["hum"] * 100,
         "windspeed": df["windspeed"] * 67,
 

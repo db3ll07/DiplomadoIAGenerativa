@@ -51,7 +51,7 @@ def build_report():
         "Se excluyeron los conteos casuales y registrados porque son componentes directos del objetivo. Se derivaron hora, día de semana, mes y año; se compararon regresión lineal, árbol de decisión y Random Forest con validación cruzada temporal de cinco pliegues. "
         f"Random Forest obtuvo el menor RMSE medio de validación ({best['cv_rmse_promedio']:.1f} alquileres). En el último 20% cronológico, su RMSE fue {best['test_rmse']:.1f} y R² {best['test_r2']:.3f}. "
         f"Una red densa de Keras, con parada temprana, alcanzó RMSE {nn.get('test_rmse', float('nan')):.1f} y R² {nn.get('test_r2', float('nan')):.3f} en el mismo periodo. "
-        "El resultado sugiere que la red mejora la prueba reservada, pero la selección del modelo debe confirmarse con validación temporal equivalente. Se recomienda usar el pronóstico como apoyo para revisar turnos y redistribución, sin extrapolarlo a estaciones individuales ni a otras ciudades."
+        "La red obtuvo menor error en ese holdout compartido, pero no participó en los mismos cinco pliegues temporales; esta diferencia impide concluir que generalice mejor. Se recomienda usar el pronóstico como apoyo para revisar turnos y redistribución, sin extrapolarlo a estaciones individuales ni a otras ciudades."
     )
     sections = [
         ("1. Introducción y definición del problema", """
@@ -72,14 +72,14 @@ Las variables predictoras son temporada, feriado, día laboral, categoría meteo
 La demanda media observada fue {inf['mean_demand_per_hour']:.1f} alquileres por hora (IC 95%: {ci[0]:.1f}–{ci[1]:.1f}). La media en días laborales fue {inf['working_day_mean']:.1f}; en días no laborales, {inf['non_working_day_mean']:.1f}. La diferencia laboral menos no laboral fue {inf['difference_work_minus_nonwork']:.1f} (IC 95% de Welch: {diff_ci[0]:.1f}–{diff_ci[1]:.1f}; p = {inf['welch_p_value']:.3g}). Es una asociación descriptiva; el contraste no identifica un efecto causal.
 """),
         ("4. Metodología", f"""
-Se ordenaron las observaciones por fecha y se reservaron los últimos {metrics['n_test']:,} registros ({metrics['n_test']/metrics['n_observations']:.0%}) como prueba temporal, desde {metrics['test_start'][:10]} hasta {metrics['test_end'][:10]}. Los modelos clásicos se ajustaron y compararon en el primer 80% con validación cruzada de cinco pliegues tipo ventana expansiva (TimeSeriesSplit). Las variables categóricas se codificaron con one-hot; las numéricas se imputaron por mediana y estandarizaron dentro de cada pipeline para evitar fuga entre pliegues.
+Se ordenaron las observaciones por fecha y se reservaron los últimos {metrics['n_test']:,} registros ({metrics['n_test']/metrics['n_observations']:.0%}) como prueba temporal, desde {metrics['test_start'][:10]} hasta {metrics['test_end'][:10]}. Los modelos clásicos se ajustaron y compararon en el primer 80% con validación cruzada de cinco pliegues tipo ventana expansiva (TimeSeriesSplit). Durante la eliminación recursiva, cada fold ajusta su propio codificador one-hot; las importancias de las categorías se agrupan por variable original y la selección conserva o elimina la variable completa. Las variables numéricas se imputan y estandarizan dentro del pipeline.
 
-Se compararon regresión lineal, árbol de decisión (profundidad máxima 18) y Random Forest (100 árboles). El criterio de selección fue el menor RMSE medio de validación cruzada. Se reportan RMSE y R²; RMSE expresa el error típico en número de alquileres y R² resume la proporción de variación explicada en esa partición.
+Se compararon regresión lineal, árbol de decisión y Random Forest con búsqueda automática de hiperparámetros. El criterio de selección fue el menor RMSE medio de validación cruzada. Se reportan RMSE, MAE, MAPE, WAPE y R². MAPE excluye objetivos reales iguales a cero; WAPE usa el error absoluto total respecto a la demanda total.
 
 La red Keras tuvo capas densas de 64 y 32 unidades, activación ReLU y dropout de 0.15. Se usó una partición temporal interna para validación y EarlyStopping con restauración de los mejores pesos. La comparación en la prueba utiliza el mismo último 20% cronológico. El componente generativo es un agente con prompt acotado y herramienta de pronóstico; requiere clave y modelo LLM configurados para la llamada externa, y ofrece un respaldo local ilustrativo.
 """),
         ("5. Resultados", f"""
-Random Forest fue el mejor modelo clásico por RMSE medio de validación cruzada. En la prueba temporal, la red neuronal obtuvo un RMSE menor que Random Forest. Esto no implica que siempre sea superior: la CV comparativa se aplicó a los modelos clásicos, mientras que la red se evaluó con una validación interna para detener el entrenamiento y una prueba externa común. El seguimiento recomendado es incluir la red en la misma validación temporal de cinco pliegues si se amplía el proyecto.
+Random Forest fue el mejor modelo clásico por RMSE medio de validación cruzada. En la prueba temporal compartida, la red neuronal obtuvo un RMSE menor que Random Forest. La red usó una validación temporal interna para detener el entrenamiento, pero no participó en los mismos cinco pliegues; por eso, el holdout común no demuestra que generalice mejor. El seguimiento recomendado es incluir la red en la misma validación temporal de cinco pliegues si se amplía el proyecto.
 
 La tabla siguiente reúne los resultados solicitados por la rúbrica. Los valores corresponden a esta división temporal y no deben interpretarse como garantías de desempeño en otro periodo o ciudad.
 """),
@@ -94,14 +94,14 @@ Se recomienda usar el modelo como una señal para planear revisiones horarias, r
     for title, body in sections:
         md += [f"\n## {title}\n\n", body.strip(), "\n"]
     md += ["\n### Tabla de comparación de modelos\n\n",
-           "| Modelo | RMSE CV (media ± DE) | RMSE prueba | MAE prueba | R² prueba |\n|---|---:|---:|---:|---:|\n"]
+           "| Modelo | RMSE CV (media ± DE) | RMSE prueba | MAE prueba | MAPE prueba | WAPE prueba | R² prueba |\n|---|---:|---:|---:|---:|---:|---:|\n"]
     for row in rows:
-        md.append(f"| {row['modelo']} | {row['cv_rmse_promedio']:.2f} ± {row['cv_rmse_std']:.2f} | {row['test_rmse']:.2f} | {row['test_mae']:.2f} | {row['test_r2']:.3f} |\n")
-    md.append(f"| Red neuronal Keras | — | {nn.get('test_rmse', float('nan')):.2f} | {nn.get('test_mae', float('nan')):.2f} | {nn.get('test_r2', float('nan')):.3f} |\n")
+        md.append(f"| {row['modelo']} | {row['cv_rmse_promedio']:.2f} ± {row['cv_rmse_std']:.2f} | {row['test_rmse']:.2f} | {row['test_mae']:.2f} | {row['test_mape']:.2f}% | {row['test_wape']:.2f}% | {row['test_r2']:.3f} |\n")
+    md.append(f"| Red neuronal Keras | — | {nn.get('test_rmse', float('nan')):.2f} | {nn.get('test_mae', float('nan')):.2f} | {nn.get('test_mape', float('nan')):.2f}% | {nn.get('test_wape', float('nan')):.2f}% | {nn.get('test_r2', float('nan')):.3f} |\n")
     md += ["\n## Tablero Power BI y preparación SQL\n\n",
            "El repositorio crea una base SQLite y CSV para cargar: FactDemand, DimDate, DimHour y DimConditions. El esquema estrella, uniones y medidas DAX están documentados en `sql/` y `tablero/`. El tablero final debe mostrar observado y pronosticado por hora/mes, MAE, sesgo y segmentación por clima y calendario.\n",
            "\n## Anexo: componente generativo\n\n",
-           "El prompt de sistema y sus ejemplos están en `docs/ia_generativa.md`. La herramienta `predict_hour_demand` consulta el modelo clásico serializado; el LLM resume el pronóstico sin inventar estaciones o inventario. Sin credenciales, el agente usa una respuesta local de demostración.\n",
+           "El prompt de sistema y sus ejemplos están en `docs/ia_generativa.md`. La herramienta `predict_hour_demand` consulta el modelo clásico serializado; el LLM resume el pronóstico sin inventar estaciones o inventario. Para una demostración real en la defensa, ejecuta `python scripts/demand_agent.py --require-llm` con `OPENAI_API_KEY` y `OPENAI_MODEL` configurados.\n",
            "\n## Referencias (APA 7)\n\n"]
     md.extend([f"- {ref}\n" for ref in REFERENCES])
     md_path = REPORTS / "Articulo_DemandaBicicletas.md"
@@ -128,10 +128,10 @@ Se recomienda usar el modelo como una señal para planear revisiones horarias, r
                 if imgpath.exists():
                     story += [Image(str(imgpath), width=5.5*inch, height=2.8*inch), Paragraph(caption, styles["Small"])]
         if title.startswith("5."):
-            data = [["Modelo", "RMSE CV", "DE CV", "RMSE prueba", "MAE", "R²"]]
-            data += [[r["modelo"], f"{r['cv_rmse_promedio']:.1f}", f"{r['cv_rmse_std']:.1f}", f"{r['test_rmse']:.1f}", f"{r['test_mae']:.1f}", f"{r['test_r2']:.3f}"] for r in rows]
-            data += [["Red neuronal Keras", "—", "—", f"{nn.get('test_rmse', float('nan')):.1f}", f"{nn.get('test_mae', float('nan')):.1f}", f"{nn.get('test_r2', float('nan')):.3f}"]]
-            table = Table(data, repeatRows=1, colWidths=[1.45*inch, .85*inch, .65*inch, .85*inch, .65*inch, .55*inch])
+            data = [["Modelo", "RMSE CV", "DE CV", "RMSE prueba", "MAE", "MAPE", "WAPE", "R²"]]
+            data += [[r["modelo"], f"{r['cv_rmse_promedio']:.1f}", f"{r['cv_rmse_std']:.1f}", f"{r['test_rmse']:.1f}", f"{r['test_mae']:.1f}", f"{r['test_mape']:.1f}%", f"{r['test_wape']:.1f}%", f"{r['test_r2']:.3f}"] for r in rows]
+            data += [["Red neuronal Keras", "—", "—", f"{nn.get('test_rmse', float('nan')):.1f}", f"{nn.get('test_mae', float('nan')):.1f}", f"{nn.get('test_mape', float('nan')):.1f}%", f"{nn.get('test_wape', float('nan')):.1f}%", f"{nn.get('test_r2', float('nan')):.3f}"]]
+            table = Table(data, repeatRows=1, colWidths=[1.45*inch, .75*inch, .55*inch, .82*inch, .62*inch, .65*inch, .65*inch, .5*inch])
             table.setStyle(TableStyle([
                 ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#124E5A")), ("TEXTCOLOR", (0,0), (-1,0), colors.white),
                 ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"), ("FONTSIZE", (0,0), (-1,-1), 8),

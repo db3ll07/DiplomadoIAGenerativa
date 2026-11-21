@@ -31,6 +31,8 @@ python scripts/generate_report_assets.py
 python scripts/demand_agent.py
 ```
 
+Cada ejecución de `train_models.py` ajusta automáticamente los hiperparámetros de los tres modelos mediante búsqueda aleatoria y validación temporal. El script prueba 10 combinaciones por modelo; este proceso puede tardar más, especialmente para Random Forest. Los mejores parámetros quedan en `outputs/metrics/comparacion_modelos.csv`.
+
 Si PowerShell impide activar el entorno virtual, ejecuta esta instrucción solo para la ventana actual y vuelve a activar el entorno:
 
 ```powershell
@@ -38,7 +40,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 ```
 
-El agente corre en modo de demostración local sin credenciales. Para usar un servicio LLM, configura `OPENAI_API_KEY` y `OPENAI_MODEL` en la sesión; esto no es necesario para el análisis ni para los modelos predictivos.
+El agente permite una demostración local sin credenciales. Para una defensa con una llamada real al LLM y a la herramienta de pronóstico, configura `OPENAI_API_KEY` y `OPENAI_MODEL` y ejecuta `python scripts/demand_agent.py --require-llm`; esta opción se detiene con error si no obtiene respuesta del LLM.
 
 ### Archivos que genera el flujo
 
@@ -67,7 +69,7 @@ El orden de SQL antes de DAX es recomendado para verificar las tablas y document
 
 `python scripts/export_powerbi_source.py` es opcional: después de `build_sqlite.py`, genera `datos/processed/powerbi_source.xlsx` para importar las tablas en Power BI Desktop. Para el flujo de Fabric descrito arriba, se usan directamente los cuatro CSV; no hace falta cargar `demand_bikes.sqlite` ni el Excel. El repositorio no incluye un informe `.pbix` terminado.
 
-La presentación editable de 12 diapositivas está en `presentacion/Proyecto_DemandaBicicletas.pptx`. El archivo ya generado se puede abrir en PowerPoint sin instalar herramientas adicionales. Regenerarlo es opcional y requiere Node.js y el módulo Artifact Tool disponible en una carpeta `node_modules`. El script usa por defecto `node_modules` en la raíz del proyecto; si el módulo está en otra ubicación, define `ARTIFACT_TOOL_NODE_MODULES` con la ruta a esa carpeta y ejecuta `node scripts/make_presentation.mjs`. Esto no es necesario para preparar las tablas SQL/BI.
+La presentación del proyecto es [`presentacion/Proyecto_DemandaBicicletas_interactiva.html`](presentacion/Proyecto_DemandaBicicletas_interactiva.html). Es un único archivo autónomo: se abre directamente en el navegador, funciona sin servidor ni conexión a internet e incluye el modelo Random Forest para ejecutar predicciones localmente. Para regenerarla después de actualizar datos o modelo, ejecuta `python scripts/build_interactive_html.py` desde la raíz del proyecto. La diapositiva de Power BI queda pendiente para elaboración manual.
 
 ## Proyecto y rúbrica
 
@@ -75,7 +77,7 @@ El proyecto documenta el problema de negocio, origen y preparación de datos, an
 
 ### Decisión y métricas
 
-La decisión que se busca apoyar es cuándo conviene revisar la disponibilidad agregada de bicicletas. Se comparan regresión lineal, árbol de decisión y Random Forest mediante validación cruzada temporal de cinco pliegues. El último 20% cronológico se reserva como prueba final. Se reportan RMSE, MAE y R². Una red densa de Keras se evalúa en ese mismo periodo, con una validación temporal interna para detener el entrenamiento; no se incluyó en la misma validación cruzada de cinco pliegues que los modelos clásicos.
+La decisión que se busca apoyar es cuándo conviene revisar la disponibilidad agregada de bicicletas. Los modelos clásicos usan RFECV con codificación one-hot dentro de cada fold y validación cruzada temporal de cinco pliegues. El último 20% cronológico se reserva como prueba final. Se reportan RMSE, MAE, MAPE, WAPE y R². Una red densa de Keras se evalúa en ese mismo periodo, con una validación temporal interna para detener el entrenamiento; no se incluyó en la misma validación cruzada de cinco pliegues que los modelos clásicos. Por ello, su resultado en el holdout común no prueba por sí solo una mejor generalización.
 
 Los resultados son históricos y corresponden a Washington, D. C. El dataset no incluye inventario ni ubicaciones por estación. Por ello, las estimaciones son una señal de planeación y no indican cuántas bicicletas mover ni a qué lugar. La diferencia entre días laborales y no laborales es asociativa y no demuestra causalidad.
 
