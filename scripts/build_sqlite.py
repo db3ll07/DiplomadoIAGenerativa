@@ -39,7 +39,7 @@ def main():
     dim_date["month"] = dim_date.date.dt.month
     dim_date["month_name"] = dim_date.date.dt.month_name()
     dim_date["day"] = dim_date.date.dt.day
-    dim_date["day_of_week"] = dim_date.date.dt.dayofweek
+    dim_date["day_of_week"] = dim_date.date.dt.day_of_week
     dim_date["day_name"] = dim_date.date.dt.day_name()
     dim_date["is_holiday"] = df.groupby("date_key").holiday.first().reindex(dim_date.date_key).to_numpy()
     dim_date["is_working_day"] = df.groupby("date_key").workingday.first().reindex(dim_date.date_key).to_numpy()

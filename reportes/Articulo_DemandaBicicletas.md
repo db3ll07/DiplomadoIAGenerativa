@@ -16,13 +16,13 @@ El costo de equivocarse es operativo: una subestimación puede dejar menos bicic
 
 ## 2. Estado del arte
 
-La investigación sobre bicicletas compartidas ha usado variables temporales y meteorológicas para predecir demanda y orientar la operación. Fanaee-T y Gama (2014) describen el uso de conocimiento de dominio para etiquetar eventos en datos de alquileres; su trabajo está ligado al conjunto público usado aquí. Nam et al. (2024) estudian pronósticos horarios con estaciones de bicicletas y Random Forest, y resaltan la relevancia de señales temporales y meteorológicas. Feng et al. (2024) desarrollan una red neuronal espaciotemporal para pronosticar demanda de alquileres y devoluciones por estación. Chen et al. (2022) analizan demanda a nivel de comunidad con aprendizaje profundo.
+La investigación sobre bicicletas compartidas ha usado variables temporales y meteorológicas para predecir demanda y orientar la operación. Fanaee-T y Gama (2014) describen el uso de conocimiento de dominio para etiquetar eventos en datos de alquileres; su trabajo está ligado al conjunto público usado aquí. Hong et al. (2024) estudian pronósticos horarios con estaciones de bicicletas y Random Forest, y resaltan la relevancia de señales temporales y meteorológicas. Feng et al. (2024) desarrollan una red neuronal espaciotemporal para pronosticar demanda de alquileres y devoluciones por estación. Mehdizadeh Dastjerdi y Morency (2022) analizan demanda a nivel de comunidad con aprendizaje profundo.
 
 Estos estudios incluyen señales espaciales o secuencias de inventario que el dataset de este proyecto no ofrece. Por eso se utilizan como contexto metodológico, no como una comparación directa de resultados. Para un proyecto inicial se eligen modelos tabulares sencillos y una red densa, que permiten comparar métodos de forma comprensible sin afirmar que resuelven la asignación por estación.
 
 ## 3. Datos y análisis exploratorio
 
-La fuente es el Bike Sharing Dataset del UCI Machine Learning Repository. Contiene 17,379 filas horarias del 1 de enero de 2011 al 31 de diciembre de 2012. Se cambiaron nombres de columnas y unidades para facilitar el análisis, se combinaron fecha y hora, y se eliminaron duplicados por fecha/hora. No se observaron valores faltantes en las variables seleccionadas. La evaluación usa un corte cronológico: el último 20% de las observaciones queda reservado para la prueba final.
+La fuente es el Bike Sharing Dataset del UCI Machine Learning Repository, atribuido a Fanaee-T (2013) y disponible bajo licencia CC BY 4.0. Contiene 17,379 filas horarias del 1 de enero de 2011 al 31 de diciembre de 2012. Se cambiaron nombres de columnas y unidades para facilitar el análisis, se combinaron fecha y hora, y se eliminaron duplicados por fecha/hora. Las filas observadas no tienen valores faltantes en las variables seleccionadas; sin embargo, faltan 165 marcas horarias respecto a la secuencia continua esperada. Esos huecos se conservan como ausencia de registro y no se convierten en demanda cero. La evaluación usa un corte cronológico: el último 20% de las observaciones queda reservado para la prueba final.
 
 Las variables predictoras son temporada, feriado, día laboral, categoría meteorológica, temperatura, sensación térmica, humedad, velocidad de viento y características derivadas de fecha/hora. El objetivo `count` representa alquileres totales. Se excluyen `casual` y `registered` porque suman directamente el objetivo y filtrarían la respuesta hacia los predictores.
 
@@ -68,7 +68,7 @@ El prompt de sistema y sus ejemplos están en `docs/ia_generativa.md`. La herram
 ## Referencias (APA 7)
 
 - Fanaee-T, H., & Gama, J. (2014). Event labeling combining ensemble detectors and background knowledge. Progress in Artificial Intelligence, 2, 113–127. https://doi.org/10.1007/s13748-013-0040-3
-- Nam, H., et al. (2024). Framework for hourly demand forecasting of bike-sharing stations: Case study of the four main gate areas in Seoul. International Journal of Urban Sciences, 28(4). https://doi.org/10.1080/12265934.2024.2317198
+- Hong, J., Han, E., & Park, D. (2024). Framework for hourly demand forecasting of bike-sharing stations: Case study of the four main gate areas in Seoul. International Journal of Urban Sciences, 28(4), 735–750. https://doi.org/10.1080/12265934.2024.2317198
 - Feng, J., Liu, H., Zhou, J., & Zhou, Y. (2024). A spatial-temporal aggregated graph neural network for docked bike-sharing demand forecasting. ACM Transactions on Knowledge Discovery from Data, 18(9), Article 232. https://doi.org/10.1145/3690388
-- Chen, J., et al. (2022). Bike-sharing demand prediction at community level under COVID-19 using deep learning. Sensors, 22(3), 1060. https://doi.org/10.3390/s22031060
-- UCI Machine Learning Repository. (2013). Bike Sharing Dataset. https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset
+- Mehdizadeh Dastjerdi, A., & Morency, C. (2022). Bike-sharing demand prediction at community level under COVID-19 using deep learning. Sensors, 22(3), Article 1060. https://doi.org/10.3390/s22031060
+- Fanaee-T, H. (2013). Bike Sharing [Data set]. UCI Machine Learning Repository. https://doi.org/10.24432/C5W894

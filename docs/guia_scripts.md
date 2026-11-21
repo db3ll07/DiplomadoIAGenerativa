@@ -11,13 +11,14 @@ Para regenerar todos los resultados, sigue la sección **Ejecutar el flujo de an
 1. Ejecuta `python scripts/download_data.py` para descargar los datos.
 2. Ejecuta `python scripts/prepare_data.py` para crear las observaciones limpias.
 3. Ejecuta `python scripts/train_models.py` para guardar las predicciones del periodo de prueba. El script ajusta obligatoriamente los hiperparámetros de cada modelo usando validación temporal y guarda los mejores valores en `outputs/metrics/comparacion_modelos.csv`.
-4. Ejecuta `python scripts/build_sqlite.py`. Este paso crea la base local `datos/processed/demand_bikes.sqlite` y los cuatro CSV (`FactDemand.csv`, `DimDate.csv`, `DimHour.csv` y `DimConditions.csv`) que se cargan en el Lakehouse. Para comparar pronósticos, incluye este paso después del entrenamiento.
-5. En Fabric, carga los cuatro CSV al Lakehouse y usa **Cargar en tablas** para convertirlos en tablas. No cargues el archivo SQLite para este flujo.
-6. Ejecuta las consultas de [`sql/queries.sql`](../sql/queries.sql) en el endpoint de análisis SQL del Lakehouse, una por una.
-7. Crea el modelo semántico y sus relaciones; después agrega las medidas DAX siguiendo [`sql/medidas_dax.md`](../sql/medidas_dax.md).
-8. Crea el informe y las tarjetas siguiendo [`tablero/README.md`](../tablero/README.md).
+4. Ejecuta `python scripts/build_interactive_html.py` para reconstruir la presentación HTML con las métricas y las gráficas comparativas.
+5. Ejecuta `python scripts/build_sqlite.py`. Este paso crea la base local `datos/processed/demand_bikes.sqlite` y los cuatro CSV (`FactDemand.csv`, `DimDate.csv`, `DimHour.csv` y `DimConditions.csv`) que se cargan en el Lakehouse. Para comparar pronósticos, incluye este paso después del entrenamiento.
+6. En Fabric, carga los cuatro CSV al Lakehouse y usa **Cargar en tablas** para convertirlos en tablas. No cargues el archivo SQLite para este flujo.
+7. Ejecuta las consultas de [`sql/queries.sql`](../sql/queries.sql) en el endpoint de análisis SQL del Lakehouse, una por una.
+8. Crea el modelo semántico y sus relaciones; después agrega las medidas DAX siguiendo [`sql/medidas_dax.md`](../sql/medidas_dax.md).
+9. Crea el informe y las tarjetas siguiendo [`tablero/README.md`](../tablero/README.md). La creación del informe y su inserción en la presentación son manuales y quedan pendientes hasta que estén listos tus archivos de Power BI.
 
-El script `python scripts/export_powerbi_source.py` es opcional para este flujo: genera un Excel para importar en Power BI Desktop y debe ejecutarse después de `build_sqlite.py`. Las consultas SQL son una verificación recomendada antes de DAX, pero no son una dependencia técnica de las medidas.
+El script `python scripts/export_powerbi_source.py` es opcional para Fabric: genera un Excel con las cuatro tablas para importar en Power BI Desktop y debe ejecutarse después de `build_sqlite.py`. Las consultas SQL son una verificación recomendada antes de DAX, pero no son una dependencia técnica de las medidas.
 
 ## Qué hace cada archivo y qué tema practica
 
@@ -31,7 +32,6 @@ El script `python scripts/export_powerbi_source.py` es opcional para este flujo:
 | `scripts/export_powerbi_source.py` | Junta las tablas en un Excel para importarlo en Power BI. No genera un archivo PBIX. | Visualización y comunicación de datos. |
 | `scripts/demand_agent.py` | Calcula una estimación y puede pedir a un LLM que la explique. | IA generativa, instrucciones y herramientas. Incluye una respuesta local. |
 | `scripts/generate_report_assets.py` | Escribe el artículo y genera su PDF a partir de las métricas. | Interpretación y comunicación de resultados. |
-| `scripts/make_presentation.mjs` | Crea las diapositivas y notas para exponer el proyecto. | Comunicación de proyectos de IA. Requiere Node.js y Artifact Tool. |
 
 ## Cómo leer los resultados
 
